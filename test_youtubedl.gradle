@@ -1,8 +1,0 @@
-apply plugin: 'java'
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-dependencies {
-    implementation 'com.github.yausername.youtubedl-android:library:0.17.1'
-}

@@ -881,6 +881,14 @@ fun InlineVideoPlayer(
     var showControls by remember { mutableStateOf(true) }
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     
+    val view = LocalView.current
+    DisposableEffect(isPlaying) {
+        view.keepScreenOn = isPlaying
+        onDispose {
+            view.keepScreenOn = false
+        }
+    }
+    
     DisposableEffect(exoPlayer) {
         val listener = object : com.google.android.exoplayer2.Player.Listener {
             override fun onIsPlayingChanged(playing: Boolean) {

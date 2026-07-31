@@ -53,12 +53,5 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".player.PlayerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MyApplication"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
-        </activity>
-
     </application>
 </manifest>
