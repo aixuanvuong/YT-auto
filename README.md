@@ -53,8 +53,10 @@ app/src/main/java/com/example/
 │   ├── YoutubeExtractor.kt    # Trích xuất luồng phát (Video Streams)
 │   ├── YoutubeRelated.kt      # Gợi ý video liên quan
 │   └── VideoItem.kt           # Data class đối tượng Video
-├── db/                        # Quản lý cơ sở dữ liệu Room
-│   └── VideoHistory.kt        # Room Entity & DAO lưu lịch sử video
+├── db/                        # Quản lý cơ sở dữ liệu Room Database
+│   ├── VideoHistory.kt        # Room Entity lưu lịch sử xem video
+│   ├── VideoHistoryDao.kt     # Room DAO truy xuất cơ sở dữ liệu
+│   └── AppDatabase.kt         # Room Database Singleton (Thread-safe)
 └── ui/theme/                  # Cấu hình giao diện Material 3 (Color, Type, Theme)
 ```
 

@@ -11,7 +11,6 @@ import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import com.example.R
 import com.example.db.AppDatabase
 import com.example.db.VideoHistory
@@ -34,10 +33,7 @@ class SearchScreen(carContext: CarContext, private val initialQuery: String? = n
     private val bitmaps = mutableMapOf<String, Bitmap>()
 
     private val db by lazy {
-        Room.databaseBuilder(
-            carContext,
-            AppDatabase::class.java, "app-database"
-        ).build()
+        AppDatabase.getInstance(carContext)
     }
 
     init {

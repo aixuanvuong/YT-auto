@@ -2,32 +2,20 @@ package com.example.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import kotlinx.coroutines.flow.Flow
 
+/**
+ * Room Entity representing a video entry in the watch history database.
+ *
+ * @property videoId Unique YouTube video ID used as primary key.
+ * @property title Title of the video.
+ * @property channel Name of the channel/uploader.
+ * @property timestamp Epoch timestamp (ms) when the video was last watched.
+ */
 @Entity(tableName = "video_history")
 data class VideoHistory(
-    @PrimaryKey val videoId: String,
+    @PrimaryKey 
+    val videoId: String,
     val title: String,
     val channel: String,
-    val timestamp: Long
+    val timestamp: Long = System.currentTimeMillis()
 )
-
-@Dao
-interface VideoHistoryDao {
-    @Query("SELECT * FROM video_history ORDER BY timestamp DESC LIMIT 20")
-    fun getHistory(): Flow<List<VideoHistory>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(history: VideoHistory)
-}
-
-@Database(entities = [VideoHistory::class], version = 1, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun videoHistoryDao(): VideoHistoryDao
-}

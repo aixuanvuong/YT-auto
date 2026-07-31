@@ -312,10 +312,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        val db = androidx.room.Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "app-database"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         viewModel.initDb(db)
         
         handleIntent(intent)
