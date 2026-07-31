@@ -1,0 +1,3 @@
+dependencies {
+    testImplementation 'androidx.car.app:app-testing:1.4.0'
+}
