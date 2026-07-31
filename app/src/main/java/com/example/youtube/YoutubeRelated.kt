@@ -9,8 +9,12 @@ object YoutubeRelated {
     private var initialized = false
     private fun initIfNeeded() {
         if (!initialized) {
-            NewPipe.init(OkHttpDownloader(), Localization.DEFAULT)
-            initialized = true
+            try {
+                NewPipe.init(OkHttpDownloader(), Localization.DEFAULT)
+                initialized = true
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -39,7 +43,7 @@ object YoutubeRelated {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
         return list

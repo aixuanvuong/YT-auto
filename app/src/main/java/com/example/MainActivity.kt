@@ -136,16 +136,20 @@ class MainViewModel(application: android.app.Application) : androidx.lifecycle.A
     
     private fun loadHomeVideos() {
         viewModelScope.launch(Dispatchers.IO) {
-            val h = _history.value
-            if (h.isNotEmpty()) {
-                val related = com.example.youtube.YoutubeRelated.getRelated(h.first().videoId)
-                if (related.isNotEmpty()) {
-                    _homeVideos.value = related
-                    return@launch
+            try {
+                val h = _history.value
+                if (h.isNotEmpty()) {
+                    val related = com.example.youtube.YoutubeRelated.getRelated(h.first().videoId)
+                    if (related.isNotEmpty()) {
+                        _homeVideos.value = related
+                        return@launch
+                    }
                 }
+                val defaultSearch = com.example.youtube.YoutubeSearch.search("nhạc trẻ mới nhất")
+                _homeVideos.value = defaultSearch
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
-            val defaultSearch = com.example.youtube.YoutubeSearch.search("nhạc trẻ mới nhất")
-            _homeVideos.value = defaultSearch
         }
     }
 
@@ -312,12 +316,31 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        val db = AppDatabase.getInstance(applicationContext)
-        viewModel.initDb(db)
+        try {
+            androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+
+        try {
+            val db = AppDatabase.getInstance(applicationContext)
+            viewModel.initDb(db)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
         
-        handleIntent(intent)
+        try {
+            handleIntent(intent)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
         
-        enableEdgeToEdge()
+        try {
+            enableEdgeToEdge()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
                 ModernDarkDashboard(viewModel)
@@ -910,15 +933,23 @@ fun InlineVideoPlayer(
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             
             activity?.window?.let { window ->
-                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                insetsController.hide(WindowInsetsCompat.Type.systemBars())
-                insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                try {
+                    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                    insetsController.hide(WindowInsetsCompat.Type.systemBars())
+                    insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
             }
             onDispose {
                 activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 activity?.window?.let { window ->
-                    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                    insetsController.show(WindowInsetsCompat.Type.systemBars())
+                    try {
+                        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                        insetsController.show(WindowInsetsCompat.Type.systemBars())
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }

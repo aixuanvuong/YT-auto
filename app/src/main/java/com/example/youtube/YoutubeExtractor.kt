@@ -15,44 +15,61 @@ class OkHttpDownloader : Downloader() {
     private val client: OkHttpClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .connectTimeout(30, TimeUnit.SECONDS)
+        .apply {
+            try {
+                val specs = listOf(
+                    okhttp3.ConnectionSpec.MODERN_TLS,
+                    okhttp3.ConnectionSpec.COMPATIBLE_TLS,
+                    okhttp3.ConnectionSpec.CLEARTEXT
+                )
+                connectionSpecs(specs)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+        }
         .build()
 
     override fun execute(request: Request): Response {
-        val httpMethod = request.httpMethod()
-        val url = request.url()
-        val headers = request.headers()
-        val dataToSend = request.dataToSend()
+        try {
+            val httpMethod = request.httpMethod()
+            val url = request.url()
+            val headers = request.headers()
+            val dataToSend = request.dataToSend()
 
-        val requestBuilder = okhttp3.Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            val requestBuilder = okhttp3.Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 
-        headers.forEach { (key, list) ->
-            if (list.isNotEmpty()) {
-                requestBuilder.header(key, list[0])
+            headers.forEach { (key, list) ->
+                if (list.isNotEmpty()) {
+                    requestBuilder.header(key, list[0])
+                }
             }
-        }
 
-        if (httpMethod == "POST") {
-            val bodyData = dataToSend ?: ByteArray(0)
-            val contentType = headers["Content-Type"]?.firstOrNull() ?: "application/json; charset=utf-8"
-            requestBuilder.post(bodyData.toRequestBody(contentType.toMediaTypeOrNull()))
-        } else if (httpMethod == "GET") {
-            requestBuilder.get()
-        } else {
-            requestBuilder.method(httpMethod, dataToSend?.toRequestBody())
-        }
+            if (httpMethod == "POST") {
+                val bodyData = dataToSend ?: ByteArray(0)
+                val contentType = headers["Content-Type"]?.firstOrNull() ?: "application/json; charset=utf-8"
+                requestBuilder.post(bodyData.toRequestBody(contentType.toMediaTypeOrNull()))
+            } else if (httpMethod == "GET") {
+                requestBuilder.get()
+            } else {
+                requestBuilder.method(httpMethod, dataToSend?.toRequestBody())
+            }
 
-        val response = client.newCall(requestBuilder.build()).execute()
-        
-        val outHeaders = HashMap<String, List<String>>()
-        response.headers.names().forEach { name ->
-            outHeaders[name] = response.headers.values(name)
+            val response = client.newCall(requestBuilder.build()).execute()
+            
+            val outHeaders = HashMap<String, List<String>>()
+            response.headers.names().forEach { name ->
+                outHeaders[name] = response.headers.values(name)
+            }
+            
+            val bodyStr = response.body?.string() ?: ""
+            
+            return Response(response.code, response.message, outHeaders, bodyStr, response.request.url.toString())
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            return Response(500, e.localizedMessage ?: "Network Error", emptyMap(), "", request.url())
         }
-        
-        val bodyStr = response.body?.string() ?: ""
-        
-        return Response(response.code, response.message, outHeaders, bodyStr, response.request.url.toString())
     }
 }
 
@@ -71,8 +88,12 @@ object YoutubeExtractor {
 
     private fun initIfNeeded() {
         if (!initialized) {
-            NewPipe.init(OkHttpDownloader(), Localization.DEFAULT)
-            initialized = true
+            try {
+                NewPipe.init(OkHttpDownloader(), Localization.DEFAULT)
+                initialized = true
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -112,7 +133,7 @@ object YoutubeExtractor {
             }
             
             return VideoPlaybackInfo(autoUrl, resolutions)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             return null
         }
@@ -129,18 +150,17 @@ object YoutubeExtractor {
             val streams = extractor.videoStreams
             if (streams.isNullOrEmpty()) return null
             
-            // For low-end devices, prefer 360p or 480p or 720p to avoid decoder crash/lag
             val preferredResolutions = listOf("360p", "480p", "720p")
             for (res in preferredResolutions) {
                 val stream = streams.firstOrNull { it.resolution == res }
                 if (stream != null) return stream.content
             }
             
-            // Fallback to lowest resolution if preferred ones are not found, or any if not available
             return streams.minByOrNull { it.resolution.replace("p", "").toIntOrNull() ?: 1000 }?.content ?: streams.firstOrNull()?.content
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             return null
         }
     }
 }
+
